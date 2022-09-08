@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 var GoogleStrategy = require('passport-google-oauth20').Strategy;
-const user = require('../models/User');
+const User = require('../models/User');
 
 module.exports = function (passport){
   passport.use(new GoogleStrategy({
@@ -9,12 +9,35 @@ module.exports = function (passport){
     callbackURL: "http://localhost:3000/auth/google/callback"
   },
   async (accessToken, refreshToken, profile, cb) => {
-    console.log(profile);
-    // User.findOrCreate({ googleId: profile.id }, function (err, user) {
+    const newUser = {
+      'googleId':profile.id,
+      'displayName': profile.displayName,
+      'firstName': profile._json['given_name'],
+      'lastName': profile._json['family_name'],
+      'image': profile._json['picture']
+    }
+    // User.findOrCreate({ googleId: profile.id }, function (err, newUser) {
     //   return cb(err, user);
     // }
     // );
+    try {
+      let user = await User.findOne({'googleId':profile.id})
+      if (user){
+        cb(null, user)
+      }
+      else{
+        user = User.create(newUser)
+        cb(null, user)
+      }
+    } catch (err) {
+      console.error(err)
+    }
   }));
   passport.serializeUser((user, done) => done(null, user));
-  passport.deserializeUser((user, done) => user.findById(id, (err, user) => done(err, user)));
+  passport.deserializeUser((user, done) => User.findById(user.id, (err, user) => done(err, user)));
 };
+
+
+// todo facebook and linkedin OAUTH2 and openID connect
+// npm install passport-local
+// npm install passport-openidconnect

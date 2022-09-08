@@ -30,7 +30,7 @@ app.set('views', './views');
 // static settings
 app.use(express.static(path.join(__dirname, 'public')));
 
-// session middleware
+// session middleware 
 app.use(session({
     secret: 'keyboard cat',
     resave: false,
