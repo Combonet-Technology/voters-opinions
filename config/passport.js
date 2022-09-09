@@ -33,7 +33,7 @@ module.exports = function (passport){
       console.error(err)
     }
   }));
-  passport.serializeUser((user, done) => done(null, user));
+  passport.serializeUser((user, done) => done(null, user.id));
   passport.deserializeUser((user, done) => User.findById(user.id, (err, user) => done(err, user)));
 };
 

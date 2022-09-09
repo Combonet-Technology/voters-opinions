@@ -1,6 +1,5 @@
 const express = require('express');
 const passport = require('passport');
-const {ensureAuth, ensureAuth} = require('../middleware/auth');
 
 const router = express.Router();
 // @desc Google auth page
@@ -8,12 +7,7 @@ const router = express.Router();
 router.get('/google', passport.authenticate('google', { scope: ['profile'] }));
 
 //google auth callback /auth/google/callback
-router.get('/google/callback', 
-  passport.authenticate('google', { failureRedirect: '/' }),
-  function(req, res) {
-    // Successful authentication, redirect home.
-    res.redirect('/dashboard');
-  });
+router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/' , successRedirect: '/dashboard'}));
 
 // logout user /auth/logout
 // router.get('/logout', (req, res) => {
@@ -21,7 +15,7 @@ router.get('/google/callback',
 //   res.redirect('/')
 // })
 
-router.post('/logout', function(req, res, next) {
+router.get('/logout', function(req, res, next) {
   req.logout(function(err) {
     if (err) { return next(err); }
     res.redirect('/');

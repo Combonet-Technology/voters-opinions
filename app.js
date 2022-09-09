@@ -13,13 +13,13 @@ dotenv.config({path: './config/.env'});
 connectDB();
 const app = express();
 
-// load passport
-require('./config/passport')(passport)
-
 // logging
 if (process.env.NODE_ENV === 'development'){
-    app.use(morgan('dev'));
+  app.use(morgan('dev'));
 }
+
+// load passport
+require('./config/passport')(passport)
 
 //handlebars 
 // app.engine('.hbs', expressHBS.engine({defaultLayout:'main', extname: '.hbs'}));
@@ -37,10 +37,13 @@ app.use(session({
     saveUninitialized: false,
     // cookie: { secure: true }
   }))
+  
+  // passport middleware
+  app.use(passport.initialize()) //http://localhost:3000/auth/google/callback
+  app.use(passport.session())
 
-// passport middleware
-app.use(passport.initialize()) //http://localhost:3000/auth/google/callback
-app.use(passport.session())
+// load passport
+require('./config/passport')(passport)
 
 // base routes
 app.use('/', require('./routes/index'));
