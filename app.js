@@ -4,7 +4,8 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const morgan = require('morgan');
 const passport = require('passport');
-const session = require('express-session');
+// const session = require('cookie-session');
+const session = require('express-session');// cookie-session
 // const expressHBS = require('express-handlebars');
 const { engine } = require('express-handlebars');
 
@@ -35,7 +36,7 @@ app.use(session({
     secret: 'keyboard cat',
     resave: false,
     saveUninitialized: false,
-    // cookie: { secure: true }
+    // cookie: { secure: true, maxAge:60000 }
   }))
   
   // passport middleware

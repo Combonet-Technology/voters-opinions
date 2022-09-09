@@ -16,10 +16,6 @@ module.exports = function (passport){
       'lastName': profile._json['family_name'],
       'image': profile._json['picture']
     }
-    // User.findOrCreate({ googleId: profile.id }, function (err, newUser) {
-    //   return cb(err, user);
-    // }
-    // );
     try {
       let user = await User.findOne({'googleId':profile.id})
       if (user){
@@ -34,9 +30,8 @@ module.exports = function (passport){
     }
   }));
   passport.serializeUser((user, done) => done(null, user.id));
-  passport.deserializeUser((user, done) => User.findById(user.id, (err, user) => done(err, user)));
+  passport.deserializeUser((id, done) => User.findById(id, (err, user) => done(err, user)));
 };
-
 
 // todo facebook and linkedin OAUTH2 and openID connect
 // npm install passport-local
