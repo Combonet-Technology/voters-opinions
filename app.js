@@ -8,6 +8,7 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const { engine } = require("express-handlebars");
 const { default: mongoose } = require("mongoose");
+const methodOverride = require("method-override");
 
 // load config
 dotenv.config({ path: "./config/.env" });
@@ -17,6 +18,18 @@ const app = express();
 // body parser middleware
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+
+// Method override middleware
+app.use(
+  methodOverride(function (req, res) {
+    if (req.body && typeof req.body === "object" && "_method" in req.body) {
+      // look in urlencoded POST bodies and delete it
+      let method = req.body._method;
+      delete req.body._method;
+      return method;
+    }
+  })
+);
 
 // logging
 if (process.env.NODE_ENV === "development") {
@@ -72,6 +85,12 @@ app.use(
 // passport middleware
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Set global var
+app.use(function (req, res, next) {
+  res.locals.user = req.user || null;
+  next();
+});
 
 // load passport
 require("./config/passport")(passport);

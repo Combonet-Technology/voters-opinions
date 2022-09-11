@@ -31,7 +31,6 @@ router.get("/", ensureAuth, async (req, res) => {
       .populate("user")
       .sort({ createdAt: "desc" })
       .lean();
-    console.log(opinions[0]._id);
     res.render("opinions/index", {
       opinions,
     });
@@ -73,19 +72,19 @@ router.get("/:id", ensureAuth, async (req, res) => {
 // @route   GET /opinions/edit/:id
 router.get("/edit/:id", ensureAuth, async (req, res) => {
   try {
-    const story = await Story.findOne({
+    const selectedOpinion = await Opinions.findOne({
       _id: req.params.id,
     }).lean();
 
-    if (!story) {
+    if (!selectedOpinion) {
       return res.render("error/404");
     }
 
-    if (story.user != req.user.id) {
+    if (selectedOpinion.user != req.user.id) {
       res.redirect("/opinions");
     } else {
       res.render("opinions/edit", {
-        story,
+        opinion: selectedOpinion,
       });
     }
   } catch (err) {
@@ -98,19 +97,23 @@ router.get("/edit/:id", ensureAuth, async (req, res) => {
 // @route   PUT /opinions/:id
 router.put("/:id", ensureAuth, async (req, res) => {
   try {
-    let story = await Story.findById(req.params.id).lean();
+    let selected_opinion = await Opinions.findById(req.params.id).lean();
 
-    if (!story) {
+    if (!selected_opinion) {
       return res.render("error/404");
     }
 
-    if (story.user != req.user.id) {
+    if (selected_opinion.user != req.user.id) {
       res.redirect("/opinions");
     } else {
-      story = await Story.findOneAndUpdate({ _id: req.params.id }, req.body, {
-        new: true,
-        runValidators: true,
-      });
+      selected_opinion = await Opinions.findOneAndUpdate(
+        { _id: req.params.id },
+        req.body,
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
 
       res.redirect("/dashboard");
     }
@@ -124,16 +127,16 @@ router.put("/:id", ensureAuth, async (req, res) => {
 // @route   DELETE /opinions/:id
 router.delete("/:id", ensureAuth, async (req, res) => {
   try {
-    let story = await Story.findById(req.params.id).lean();
+    let current_opinion = await Opinions.findById(req.params.id).lean();
 
-    if (!story) {
+    if (!current_opinion) {
       return res.render("error/404");
     }
 
-    if (story.user != req.user.id) {
+    if (current_opinion.user != req.user.id) {
       res.redirect("/opinions");
     } else {
-      await Story.remove({ _id: req.params.id });
+      await Opinions.remove({ _id: req.params.id });
       res.redirect("/dashboard");
     }
   } catch (err) {
@@ -146,7 +149,7 @@ router.delete("/:id", ensureAuth, async (req, res) => {
 // @route   GET /opinions/user/:userId
 router.get("/user/:userId", ensureAuth, async (req, res) => {
   try {
-    const opinions = await Story.find({
+    const opinions = await Opinions.find({
       user: req.params.userId,
       status: "public",
     })
